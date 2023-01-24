@@ -1,3 +1,5 @@
+import { createSlice } from '@reduxjs/toolkit'
+
 const anecdotesAtStart = [
   'If it hurts, do it more often',
   'Adding manpower to a late software project makes it later!',
@@ -19,57 +21,81 @@ const asObject = (anecdote) => {
 
 const initialState = anecdotesAtStart.map(asObject)
 
-export const createVote = (id) => {
-	return {
-		type: 'VOTE',
-		data: { id }
-	}
-}
+const anecdoteSlice = createSlice({
+	name: 'anecdotes',
+	initialState, 
+	reducers: {
+		createVote(state, action){	
 
-export const createAnecdote = (content) => {
-	return {
-		type: 'NEW',
-		data: {
-			content,
-			id: getId(),
-			votes: 0
-		}	
-	}
-}
-// const noteReducer = (state = [], action) => {
-//   if (action.type === 'NEW_NOTE') {
-//     state.push(action.data)
-//     return state
-//   }
-
-//   return state
-// }
-const reducer = (state = initialState, action) => {
-	let newState = [...state]
-
-	if(action.type === 'VOTE'){
-		for(let i=0; i<newState.length; i++){
-			if(newState[i].id === action.data.id){
-				newState[i].votes++
+			for(let i=0; i<state.length; i++){
+				if(state[i].id === action.payload){
+					state[i].votes = state[i].votes+1;
+					break;
+				}
 			}
+
+			state.sort((a, b) => {
+				if(a.votes > b.votes){
+					return -1;
+				}
+		
+				return 1;
+			})
+		},
+		createAnecdote(state, action){
+			state.push({
+				content: action.payload,
+				id: getId(),
+				votes: 0
+			})
 		}
 	}
+})
 
-	if(action.type === 'NEW'){
-		newState = [...newState, action.data]
-	}
 
-	newState = newState.sort((a, b) => {
-		if(a.votes > b.votes){
-			return -1;
-		}
+// export const createVote = (id) => {
+// 	return {
+// 		type: 'VOTE',
+// 		data: { id }
+// 	}
+// }
 
-		return 1;
-	})
-//   console.log('state now: ', state)
-//   console.log('action', action)
+// export const createAnecdote = (content) => {
+// 	return {
+// 		type: 'NEW',
+// 		data: {
+// 			content,
+// 			id: getId(),
+// 			votes: 0
+// 		}	
+// 	}
+// }
 
-  return newState
-}
+// const reducer = (state = initialState, action) => {
+// 	let newState = [...state]
 
-export default reducer
+// 	if(action.type === 'VOTE'){
+// 		for(let i=0; i<newState.length; i++){
+// 			if(newState[i].id === action.data.id){
+// 				newState[i].votes++
+// 			}
+// 		}
+// 	}
+
+// 	if(action.type === 'NEW'){
+// 		newState = [...newState, action.data]
+// 	}
+
+// 	newState = newState.sort((a, b) => {
+// 		if(a.votes > b.votes){
+// 			return -1;
+// 		}
+
+// 		return 1;
+// 	})
+
+//   return newState
+// }
+
+export const { createVote, createAnecdote } = anecdoteSlice.actions
+export default anecdoteSlice.reducer
